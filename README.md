@@ -1,5 +1,5 @@
 # clio-final-project
-Data was scraped from <http://ghf.destinationnext.com/immigration/Search.aspx> 
+Data was scraped from <http://ghf.destinationnext.com/immigration/Search.aspx> using the "galveston.py" script. I used python because I found a tutorial that was very similar to what I wanted to do and was easier to follow than using rvest and wget, but I'm planning to go back and see if I can figure out how to get the same data using R.
 
 "immigration1 (2).csv" contains immigration records with date of arrival, destination, origin country, #people traveling together, and vessel name
 
