@@ -1,0 +1,166 @@
+---
+title: "German Immigration and Colonization Efforts in Texas"
+description: "1844-1850"
+author:
+  - name: Corinne Wilkinson 
+    url: corinnewilkinson.com
+    affiliation: George Mason University
+    affiliation_url: 
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(leaflet)
+library(sf)
+library(shiny)
+
+
+immigration <- read_csv("immigration1 (2).csv")
+family <- read_csv("immigrant_families2.csv")
+
+immigrant_families <- immigration %>% 
+  left_join(family, by ="family_record_num")
+
+map_data <- read_csv("map.csv")
+  
+counties <- read_sf("US_county_1860_conflated/US_county_1860_conflated.shp") %>% 
+  st_transform(4326) %>% 
+  filter(STATENAM == "Texas")
+
+
+```
+
+In the nineteenth century, the lure of the Texas frontier attracted outsiders, both American and European, to a land promising adventure, abundance, and good fortune. Texas, resisting annexation into the United States until 1845, was a particularly alluring destination for German immigrants. Word of Texas’ promising landscape spread rapidly through positive portrayals in popular media, inspiring the first wave of immigration to the American frontier. A young German, Karl Anton Postl, fled Germany to the New World in the 1830s, writing a popular novel under the pseudonym Charles Sealsfield about Texas life, which quickly became a bestseller. Sealsfield captured the European public’s imagination with descriptions of Texas as “a boundless sea of green…God’s world immaculate.^[Charles Sealsfield, *The Making of an American: An Adaptation of Memorable Tales by Charles Sealsfield*, tr. Ulrich S. Carrington (Dallas: Southern Methodist University Press, 1974).]
+Sealsfield’s work was a catalyst for the large number of similar travel books, guides, poems, and songs about Texas that would follow his lead, all depicting the land in a generous light. This version of a utopic Texas resonated well with a younger generation of “restless” Germans, growing to maturity between the revolutions of 1830 and 1848 and becoming increasingly wary of domestic political and economic strife.^[Glen E. Lich, *The German Texans* (San Antonio: The University of Texas Institute of Texan Culture at San Antonio, 1996), 2.]
+
+Another early immigrant, Friedrich Ernst, was particularly successful in inspiring the first significant wave of German colonization in Texas. Ernst had originally intended to settle in Missouri, but changed his plans when he learned that large land grants were available to Europeans to settle in Stephen F. Austin’s colony in Texas. Ernst received such a grant in 1831 for more than 4,000 acres in the northwest corner of what would become Austin County. He saw an opportunity to profit from his fortune and offered up parcels of his own land to anyone who would join him: “I have a stopping place on my estate for my countrymen until they have selected a league of land. Colonel Austin has recently promised to take care that German arrivals be settled immediately.”^[Gilbert Giddings Benjamin, *The Germans in Texas: A Study in Immigration* (Philadelphia: University of Pennsylvania, 1909).] His advertisements suggested that immigrants to Texas would be received into immediate community, quickly settled, and guaranteed prosperity. Ernst’s settlement in Austin County quickly grew into a small German village, nicknamed “Industry” by neighboring Anglo-Americans, who were amazed at the rate of growth of the German town.^[Lich, 30.] 
+
+From Ernst’s arrival in 1831 to the beginning of official, organized, immigration efforts in 1844, many Germans came to Texas, tending to cluster in ethnic enclaves. Immigrants were questioned about their final destination when arriving at port in Galveston, with many mentioning the various German land grants as their journey’s end. The majority settled in a broad, fragmented belt across the south central part of the state, stretching from Galveston and Houston in the east to Kerrville, Mason, and Hondo in the west, in what would be named the German Belt.^[Terry G. Jordan, "Germans," *Texas State Historical Association* ]
+
+```{r, echo = FALSE, fig.cap="This map shows that Comal and Gillespie Counties were the most popular destination for German Immigrants to Texas in 1844-1850.",fig.width = 9, fig.height= 7}
+map <- map_data %>% 
+  select(ICPSRNAM) %>% 
+  group_by(ICPSRNAM) %>% 
+  count(ICPSRNAM) %>% 
+  filter(!is.na(ICPSRNAM))
+
+centroids <- counties %>% 
+  st_centroid() 
+
+points <- centroids %>% 
+  left_join(map, by = "ICPSRNAM")
+
+shapes <- counties %>% 
+  left_join(map, by = "ICPSRNAM")
+
+colors <- colorBin(palette = "plasma", domain= map$n, bins = 4, pretty = TRUE,
+                   na.color = "#D3D4D5")
+
+leaflet(shapes) %>% 
+  addProviderTiles("CartoDB.PositronNoLabels") %>% 
+  addPolygons(fillColor = ~colors(n),
+              fillOpacity = 1,
+              label = ~ICPSRNAM,
+              color = "black", weight = 2) %>% 
+  addLegend("bottomleft", colors =c("#1A2DBC", "#DE448C", "#FFFD00", "#D3D4D5"), 
+        labels =   c("0-200 Immigrants", "200-400 Immigrants", "400-600 Immigrants", "No Data Available"),
+            title = "Destination County for German Immigrants to the Port of Galveston,
+            1844-1850")
+
+
+
+```
+
+As news of these land grants spread throughout Germany, a group of five sovereign princes and sixteen noblemen convened to form a society to promote Germany colonization in Texas, calling themselves the Adelsverein. They agreed that the Texas colony should be for the poor, and would be a mutually beneficial relationship, offering the poorest Germans a chance at a better life while simultaneously solving the increasingly dire problem of overpopulation within the German state. Also appealing was Texas’ status as an independent republic, which would allow the princes to extend and expand their political control to the territory.^[Rudolph Leopold Bisele, *The History of the German Settlements in Texas, 1831-1861* (Austin: Von Boeckmann-Jones, 1930)] The Adelsverein charter stated four goals: to improve the lot of the unemployed working class, to unite German immigrants by granting them the organization’s protection, to develop business connections and a market for German trade, and to provide a market in Germany for the products of these colonies.^[Lich, 18.]
+
+The Adelsverein model of colonization spread, as other German leaders capitalized on what they saw as a lucrative and profitable opportunity to rid their cities of "undesirables." Prince Carl of Solms-Braunfels would establish New Braunfels, and Ferdinand Roemer would claim Fredericksburg in honor of Prince Frederick of Prussia.^[Lich, 34-6.]
+
+<h3 align="center">Who were the early colonists?</h3>
+
+Immigration records from the Port of Galveston generally include names of passengers and members of their traveling parties, age, gender, occupation, country of origin, ship name, dates of departure and arrival, and the passenger’s final destination in the United States. Only immigrants whose first point of entry into the United States was at Galveston are captured; any others who may have traveled to Texas from a different port in the United States are not included in this data. Though records are available from 1844-1944, I am only using those from 1844-1850. After 1850, German colonization companies were officially dissolved and were no longer the driving factor for European immigration to Texas. 
+
+So who were the early colonists? Leaders of the Adelsverein intended only German “undesirables”—young, poor, single men— to take advantage of the Texas colonization opportunity.^[Bisele, 45.] However, these immigration records reflect a different reality. 
+
+<iframe src="https://clio2corinne.shinyapps.io/App-1/" height=500></iframe>
+
+These graphs show the age and gender distribution of German immigrants by year. Though the gender distribution skews male, 34% of the immigrants were female, challenging the notion that these immigrants were all men. These records also have a surprisingly normal age distribution, with people in their twenties representing the highest volume of migrants, and each year having a range in age from infancy to almost eighty years. This suggests that many multigenerational families must have moved to Texas together, lending to the wide range of ages present. 
+
+```{r, echo=FALSE, fig.cap="This plot shows the average immigrant family size from 1844-1850 remained fairly consistent at around three to four people per family."}
+
+immigrant_families %>% 
+  filter(arrival_year < 1851) %>% 
+  select(arrival_year, people) %>% 
+  group_by(arrival_year) %>% 
+  mutate(avg_arrival = mean(people)) %>% 
+ ggplot(aes(x=arrival_year))+
+   geom_line(aes(y=avg_arrival),color = "#1A2DBC")+
+  geom_point(aes(y=avg_arrival), color = "#1A2DBC")+
+  theme_minimal()+
+  scale_y_continuous(limits = c(0,5))+
+  labs(title = "Average Family Size by Year,",
+       subtitle = "Of German Immigrants to the Port of Galveston",
+       x= "Year",
+       y= "Average Family Size")
+```
+The average family size was in fact around three to four people, indicating that families made up the majority of immigrants, not just single men. Many immigration records included young children traveling with parents and often grandparents too. The presence of families moving together across the Atlantic indicates that many people saw their move as permanent and not as just a temporary measure for income to send back to their family in Europe.
+
+The economic motive was an important influence on the decision to immigrate. It was the hope of improving their material welfare which induced many Germans to direct their footsteps toward North America. They desired to escape the heavy taxation in their own country and hoped to get cheap land and higher wages in America. Texas interested both those who were no longer satisfied to endure the social conditions in Germany and those who saw immigration as a means of improving these conditions at home. Those who could no longer make a satisfactory living in Europe felt that in Texas they could acquire economic independence, while merchants and manufacturers saw the opportunity of opening up new markets for the expansion of German business. The duality of these conditions clearly appealed to a wide sector of the population.
+
+```{r, echo=FALSE, fig.cap="The graph shows that the majority of immigrants who listed an occupation were artisans."}
+
+occupation_category <- read_csv("occupation_category.csv")
+
+occupation_data <- immigrant_families %>% 
+  filter(arrival_year < 1851) %>% 
+  group_by(occupation, arrival_year) %>% 
+  count(occupation) %>% 
+  filter(!is.na(occupation)) %>% 
+  left_join(occupation_category, by ="occupation") 
+
+occupation_data$category <-factor(occupation_data$category, 
+                       levels = c("LEGAL", "CLERGY", "SERVANT", "LABORER",
+                                  "OTHER", "FARMER", "FOOD/DRINK", "ENGINEER",
+                                  "EDUCATION", "MEDICINE", "MERCHANT", "TEXTILE",
+                                  "ARTISAN")) 
+occupation_data %>% 
+filter(!is.na(category)) %>% 
+  ggplot(aes(x=category, fill=category))+
+  geom_bar()+
+  coord_flip()+
+  theme_minimal()+
+  theme(legend.position = "none")+
+  labs(title = "Occupation of German Immigrants to Texas",
+       subtitle = "By Category",
+       y = "Number of People",
+       x= "Occupation Type")
+  
+  
+```
+Though not every immigration record listed an occupation, of those who did, the majority were skilled artisans. This created an imbalance in labor in the colonies: “Most of the professional men wanted to do the directing and ordering, while the mechanics and laborers were to carry out their plans. Of course, the latter failed to see the justice of their ruling, so no one did anything."^[Emma Murck Altget quoted in Henry B. Dielmann, “Emma Altgelt’s Sketches of Life in Texas,” *Southwestern Historical Quarterly* 19, no. 1 (July 1915): 52.] Life on the frontier was difficult, and early colonists were often expected to perform hard labor that many were unaccustomed to doing. While not every immigrant listed their occupation as a skilled job, clearly some of the people leaving Germany were employable, upstanding citizens, and not the “undesirables” the Adelsverein hoped to shed from their societies.
+
+<h3 align="center">Were early colonization efforts successful?</h3>
+
+In December of 1844, three shiploads of Germans arrived in Galveston and proceeded down the coast to Matagorda Bay. A warehouse and other facilities had been erected ahead of their arrival, but there were no living accommodations for the hundreds of newly arrived immigrants who were forced to camp on the open beach in winter weather.^[Lich, 31.] It was not until March of 1845 that the first large German town, New Braunfels, would be established by the Comal River. Despite rampant disease and death, New Braunfels grew steadily, in part due to the hardworking farmers and craftsmen that made of the majority of Adelsverein immigrants.
+
+Another success story was the town of Fredericksburg. A wagon train left New Braunfels on April 23, 1846, and settled in a spot in the northwest Hill Country of Texas, naming the land after Prince Frederick of Prussia. The leader of the group, John Meusebach, negotiated with the Comanche tribe to secure a treaty for more than three million acres of land beyond the San Saba River for German colonization and exploration. After the treaty was signed, Meusebach encouraged German families to settle the Hill Country as farmers and ranchers. Petitions were circulated for the organization of new counties around the German settlements. In 1846, the state legislature created Comal County with New Braunfels as the county seat, and in 1848 Fredericksburg became the seat of Gillespie County. By 1850, the German population of Fredericksburg approached 2,000.^[Lich, 34-7.]
+
+Though life in early German Texas settlements were difficult, many believed the struggle was a fair price to pay. Writing from Fredericksburg, Peter Birk enthusiastically advised his friends in the homeland to “leave Germany and come here where you can live happily… if you work only half as much as in Germany you can live without troubles."^[Letter from Peter Birk, January 15, 1850, in Irene Marschall King, *Comanches on the Peace-Path* (Waco: Texian, 1970), 135.]
+
+Even as Texas gained admission into the United States on December 29, 1845, German colonization companies still operated and even actively helped immigrants claim citizenship in their new land. However, by 1846, the work of the Adelsverein began to slow as many of the rich nobles who had supported the Texas project began to lose interest in their grandiose project of creating a model German state in the New World. Texas’ annexation into the United States halted their political influence and potential profits. However, the demise of the Adelsverein in no way slowed down German immigration to Texas; rather, the movement continued to gain impetus with each passing year, and only the Civil War brought it to a momentary standstill.^[Lich, 41.]
+
+<h3 align="center">Conclusion</h3>
+
+German colonization of Texas was clearly successful because of organized movements by elite groups like the Adelsverein. They succeeded in creating a utopic narrative of Texas life that perfectly resonated with a wide variety of disgruntled Germans, unsatisfied with their current life and inspired to immigrate to the New World. While Texas was not in reality always what these immigrants had pictured, the large majority seemed content to stay and strengthen the German enclaves being built around the state, attracting even more of their countrymen.
+
+While these early immigrants were not who the Adelsverein had hoped to attract to the Texas colonies, they were largely successful in establishing large settlements in the Brazos and Colorado valleys. They were land-owning families, artisans, and, in a few cases, university-educated professional people and intellectuals. The Germans were ambitious farmers and artisans who believed their futures were cramped by the social and economic system at home. They were not poverty-stricken and oppressed as often portrayed. The immigrants “brought their past with them,” trusting that in the new world “everything would take root… grow bigger and better than before, seekers pursuing a dream."^[Theodore Huebener, *The Germans in America* (Philadelphia: Chilton, 1962).] This dream became a reality, with much of Western Texas developed by German immigrants by the mid-nineteenth century.
+
+## Acknowledgments {.appendix}
+
+Data was digitized for geneaology research by the Texas Seaport Museum from microfilm of Department of Justice Immigration and Naturalization Service passenger manifests from the National Archives, books containing additional source material and isolated passenger lists published in The Galveston Daily News. 
+<http://ghf.destinationnext.com/immigration/Search.aspx>
+
+Code available at <https://github.com/cwilkin8/clio-final-project> 
